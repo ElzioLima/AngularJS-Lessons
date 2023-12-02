@@ -27,9 +27,10 @@
         }
     </style>
     <script src="lib/angularjs/angular.js"></script>
+    <script src="lib/angularjs/angular-messages.js"></script>
     <script>
-        angular.module("phoneBook", []);
-        angular.module("phoneBook", []).controller("phoneBookController", function ($scope) {
+        angular.module("phoneBook", ["ngMessages"]);
+        angular.module("phoneBook").controller("phoneBookController", function ($scope) {
             $scope.app = "Lista Telefônica"
             $scope.year = "2023"
             $scope.author = "Elzio Lima - By Rodrigo Branas"
@@ -50,6 +51,7 @@
                     operator
                 });
                 delete $scope.contact;
+                $scope.contactForm.$setPristine();
             }
             $scope.removeContacts = function (contacts) {
                 $scope.contacts = contacts.filter((contact) => {
@@ -61,22 +63,33 @@
                     return contact.selected
                 })
             }
+            $scope.isError = function (attribute) {
+                return Object.keys(attribute.$error).some((errorKey) => {
+                    return attribute.$error[errorKey];
+                });
+            }
         });
     </script>
 </head>
 <body ng-controller="phoneBookController">
     <div class="jumbotron">
         <h4>{{app}}</h4>
-        <table ng-if="contacts.length" class="table">
+        <table 
+            ng-if="contacts.length" 
+            class="table">
             <tr>
                 <th></th>
                 <th>Nome</th>
                 <th>Telefone</th>
                 <th>Operadora</th>
             </tr>
-            <tr ng-class="[{'selected bold': contact.selected}]" ng-repeat="contact in contacts">
+            <tr 
+                ng-class="[{'selected bold': contact.selected}]" 
+                ng-repeat="contact in contacts">
                 <td>
-                    <input type="checkbox" ng-model="contact.selected"/>
+                    <input 
+                        type="checkbox" 
+                        ng-model="contact.selected"/>
                 </td>
                 <td>{{contact.name}}</td>
                 <td>{{contact.number}}</td>
@@ -84,23 +97,76 @@
             </tr>
         </table>
         <hr/>
-        <input class="form-control" type="text" ng-model="contact.name" placeholder="Nome"/>
-        <input class="form-control" type="text" ng-model="contact.number" placeholder="Telefone"/>
-        <select 
-            class="form-control" 
-            ng-model="contact.operator" 
-            ng-options=
-                "operator.code 
-                as operator.name 
-                group by operator.categories
-                for operator 
-                in operators">
-            <option value="">Selecione uma operadora</option>
-        </select>
+        <form name="contactForm">
+            <input 
+                class="form-control" 
+                type="text" 
+                ng-model="contact.name"
+                name="name" 
+                placeholder="Nome"
+                ng-required="true"
+                ng-minlength="10"/>
+            <input 
+                class="form-control" 
+                type="text" 
+                ng-model="contact.number"
+                name="number" 
+                placeholder="Telefone"
+                ng-required="true"
+                ng-pattern="/^\d{5}-\d{4}$/"/>
+            <select 
+                class="form-control" 
+                ng-model="contact.operator"
+                name="operator" 
+                ng-options=
+                    "operator.code 
+                    as operator.name 
+                    group by operator.categories
+                    for operator 
+                    in operators"
+                ng-required="true">
+                <option value="">Selecione uma operadora</option>
+            </select>
+        </form>
+        <div 
+            ng-messages="contactForm.name.$error"
+            ng-show="contactForm.name.$dirty && isError(contactForm.name)"
+            class="alert alert-danger">
+            <div 
+                class="alert alert-danger"
+                ng-message="required">
+                <p>Preencha o nome</p>
+            </div>
+            <div 
+                class="alert alert-danger"
+                ng-message="minlength">
+                <p>O nome deve ter, no mínimo, 10 caracteres</p>
+            </div>
+        </div>
+        <div 
+            ng-messages="contactForm.number.$error" 
+            ng-show="contactForm.number.$dirty && isError(contactForm.number)"
+            class="alert alert-danger">
+            <div 
+                class="alert alert-danger"
+                ng-message="required">
+                <p>Preencha o telefone</p>
+            </div>
+            <div 
+                class="alert alert-danger"
+                ng-message="pattern">
+                <p>Preencha o telefone no formato adequado</p>
+            </div>
+        </div>
+        <div 
+            class="alert alert-danger"
+            ng-show="contactForm.operator.$dirty && isError(contactForm.operator)">
+            <p>Preencha a operadora</p>
+        </div>
         <button 
             class="btn btn-primary btn-block" 
             ng-click="addContact(contact)"
-            ng-if="contact.name && contact.number && contact.operator">
+            ng-if="contactForm.$valid">
                 Adicionar Contato
         </button>
         <button 
