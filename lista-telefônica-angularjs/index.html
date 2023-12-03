@@ -63,7 +63,7 @@
                     return contact.selected
                 })
             }
-            $scope.isError = function (attribute) {
+            $scope.hasError = function (attribute) {
                 return Object.keys(attribute.$error).some((errorKey) => {
                     return attribute.$error[errorKey];
                 });
@@ -130,7 +130,7 @@
         </form>
         <div 
             ng-messages="contactForm.name.$error"
-            ng-show="contactForm.name.$dirty && isError(contactForm.name)"
+            ng-show="contactForm.name.$dirty && hasError(contactForm.name)"
             class="alert alert-danger">
             <div 
                 class="alert alert-danger"
@@ -145,7 +145,7 @@
         </div>
         <div 
             ng-messages="contactForm.number.$error" 
-            ng-show="contactForm.number.$dirty && isError(contactForm.number)"
+            ng-show="contactForm.number.$dirty && hasError(contactForm.number)"
             class="alert alert-danger">
             <div 
                 class="alert alert-danger"
@@ -160,7 +160,7 @@
         </div>
         <div 
             class="alert alert-danger"
-            ng-show="contactForm.operator.$dirty && isError(contactForm.operator)">
+            ng-show="contactForm.operator.$dirty && hasError(contactForm.operator)">
             <p>Preencha a operadora</p>
         </div>
         <button 
